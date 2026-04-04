@@ -1,0 +1,3 @@
+ALTER TABLE `User`
+ADD COLUMN `refreshTokenHash` VARCHAR(191) NULL,
+ADD COLUMN `refreshTokenExpiry` DATETIME(3) NULL;

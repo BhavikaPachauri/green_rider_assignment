@@ -1,0 +1,115 @@
+@baseUrl = http://localhost:5000
+@email = test@example.com
+@password = 12345678
+@accessToken = 
+@refreshToken = 
+@taskId = 1
+
+### Register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Login
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+> {%
+  client.global.set("accessToken", response.body.accessToken);
+  client.global.set("refreshToken", response.body.refreshToken);
+%}
+
+### Refresh Token
+# @name refresh
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+> {%
+  client.global.set("accessToken", response.body.accessToken);
+  client.global.set("refreshToken", response.body.refreshToken);
+%}
+
+### Logout
+POST {{baseUrl}}/auth/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### Create Task
+# @name createTask
+POST {{baseUrl}}/tasks
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "title": "My first task"
+}
+
+> {%
+  client.global.set("taskId", response.body.id);
+%}
+
+### Get All Tasks
+GET {{baseUrl}}/tasks
+Authorization: Bearer {{accessToken}}
+
+### Get Tasks With Pagination
+GET {{baseUrl}}/tasks?page=1&limit=5
+Authorization: Bearer {{accessToken}}
+
+### Get Tasks Filtered By Status
+GET {{baseUrl}}/tasks?status=false
+Authorization: Bearer {{accessToken}}
+
+### Search Tasks By Title
+GET {{baseUrl}}/tasks?search=first
+Authorization: Bearer {{accessToken}}
+
+### Get One Task
+GET {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{accessToken}}
+
+### Update Task
+PATCH {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "title": "Updated task title",
+  "completed": false
+}
+
+### Toggle Task
+PATCH {{baseUrl}}/tasks/{{taskId}}/toggle
+Authorization: Bearer {{accessToken}}
+
+### Delete Task
+DELETE {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{accessToken}}
+
+### Unauthorized Check
+GET {{baseUrl}}/tasks
+
+### Validation Check: Empty Task Title
+POST {{baseUrl}}/tasks
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{}
+
