@@ -9,6 +9,8 @@ type AdapterConfig = {
   password: string;
   database: string;
   connectionLimit: number;
+  connectTimeout: number;
+  acquireTimeout: number;
   ssl?: boolean | {
     ca?: string;
     rejectUnauthorized?: boolean;
@@ -37,6 +39,22 @@ const sslConfig = () => {
   };
 };
 
+const parsePositiveNumber = (value: string | undefined, fallback: number) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+const timeoutConfig = () => ({
+  connectTimeout: parsePositiveNumber(
+    process.env.DATABASE_CONNECT_TIMEOUT_MS,
+    10000,
+  ),
+  acquireTimeout: parsePositiveNumber(
+    process.env.DATABASE_ACQUIRE_TIMEOUT_MS,
+    30000,
+  ),
+});
+
 const parseDatabaseUrl = (raw: string | undefined): AdapterConfig | null => {
   if (!raw) return null;
   try {
@@ -48,6 +66,7 @@ const parseDatabaseUrl = (raw: string | undefined): AdapterConfig | null => {
       password: decodeURIComponent(url.password),
       database: url.pathname.replace(/^\//, ""),
       connectionLimit: 5,
+      ...timeoutConfig(),
       ssl: sslConfig(),
     };
   } catch {
@@ -64,6 +83,7 @@ const fromEnv = (): AdapterConfig => {
     password: process.env.DATABASE_PASSWORD ?? "",
     database: process.env.DATABASE_NAME ?? "Green Rider",
     connectionLimit: 5,
+    ...timeoutConfig(),
     ssl: sslConfig(),
   };
 };

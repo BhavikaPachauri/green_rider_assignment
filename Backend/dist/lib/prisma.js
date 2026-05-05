@@ -16,6 +16,14 @@ const sslConfig = () => {
         rejectUnauthorized: !parseBoolean(process.env.DATABASE_SSL_ALLOW_UNAUTHORIZED),
     };
 };
+const parsePositiveNumber = (value, fallback) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+const timeoutConfig = () => ({
+    connectTimeout: parsePositiveNumber(process.env.DATABASE_CONNECT_TIMEOUT_MS, 10000),
+    acquireTimeout: parsePositiveNumber(process.env.DATABASE_ACQUIRE_TIMEOUT_MS, 30000),
+});
 const parseDatabaseUrl = (raw) => {
     if (!raw)
         return null;
@@ -28,6 +36,7 @@ const parseDatabaseUrl = (raw) => {
             password: decodeURIComponent(url.password),
             database: url.pathname.replace(/^\//, ""),
             connectionLimit: 5,
+            ...timeoutConfig(),
             ssl: sslConfig(),
         };
     }
@@ -44,6 +53,7 @@ const fromEnv = () => {
         password: process.env.DATABASE_PASSWORD ?? "",
         database: process.env.DATABASE_NAME ?? "Green Rider",
         connectionLimit: 5,
+        ...timeoutConfig(),
         ssl: sslConfig(),
     };
 };
