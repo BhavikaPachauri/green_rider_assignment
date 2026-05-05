@@ -3,8 +3,9 @@ import AppProviders from "@/components/providers/app-providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Earnest Tasks",
-  description: "Responsive task dashboard built with Next.js and TypeScript",
+  title: "Earnest Projects",
+  description:
+    "Project and task tracker with role-based access, assignment, status, and overdue alerts.",
 };
 
 export default function RootLayout({

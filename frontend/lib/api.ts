@@ -3,10 +3,10 @@ import type {
   ApiRequestInit,
   ApiResponse,
   AuthTokensResponse,
+  LoginPayload,
+  PublicUser,
   RefreshPayload,
   RegisterPayload,
-  Task,
-  TaskListResponse,
 } from "@/types/api";
 
 const API_BASE_URL =
@@ -60,7 +60,7 @@ export async function apiRequest<T>(
   return readResponse<T>(response);
 }
 
-export function postLogin(payload: RegisterPayload) {
+export function postLogin(payload: LoginPayload) {
   return apiRequest<AuthTokensResponse>("/auth/login", {
     method: "POST",
     body: JSON.stringify(payload),
@@ -68,7 +68,7 @@ export function postLogin(payload: RegisterPayload) {
 }
 
 export function postRegister(payload: RegisterPayload) {
-  return apiRequest<ApiResponse>("/auth/register", {
+  return apiRequest<PublicUser>("/auth/register", {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -88,10 +88,6 @@ export function postLogout(payload: RefreshPayload) {
   });
 }
 
-export function getTasks(query: string, accessToken: string) {
-  return apiRequest<TaskListResponse>(`/tasks${query}`, { accessToken });
-}
-
-export function getTask(taskId: number, accessToken: string) {
-  return apiRequest<Task>(`/tasks/${taskId}`, { accessToken });
+export function getMe(accessToken: string) {
+  return apiRequest<PublicUser>("/auth/me", { accessToken });
 }

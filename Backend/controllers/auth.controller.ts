@@ -3,9 +3,22 @@ import bcrypt from "bcrypt";
 import { prisma } from "../lib/prisma.js";
 import { generateAccessToken, generateRefreshToken } from "../lib/jwt.js";
 import jwt from "jsonwebtoken";
+import type { Role } from "../generated/prisma/client.js";
 
 const REFRESH_TOKEN_SALT_ROUNDS = 10;
 const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+const ALLOWED_ROLES: readonly Role[] = ["ADMIN", "MEMBER"] as const;
+
+const sanitizeRole = (value: unknown): Role => {
+  if (typeof value === "string") {
+    const upper = value.toUpperCase();
+    if (ALLOWED_ROLES.includes(upper as Role)) {
+      return upper as Role;
+    }
+  }
+  return "MEMBER";
+};
 
 const createRefreshTokenSession = async (userId: number) => {
   const refreshToken = generateRefreshToken(userId);
@@ -42,16 +55,47 @@ const extractRefreshToken = (body: unknown) => {
     : null;
 };
 
-export const register: RequestHandler = async (req, res) => {
-  const { email, password } = req.body;
+const publicUser = (user: {
+  id: number;
+  name: string;
+  email: string;
+  role: Role;
+  createdAt: Date;
+}) => ({
+  id: user.id,
+  name: user.name,
+  email: user.email,
+  role: user.role,
+  createdAt: user.createdAt,
+});
 
-  if (typeof email !== "string" || typeof password !== "string" || !email.trim() || !password.trim()) {
-    res.status(400).json({ message: "Email and password are required" });
+export const register: RequestHandler = async (req, res) => {
+  const { name, email, password, role } = req.body ?? {};
+
+  if (
+    typeof name !== "string" ||
+    typeof email !== "string" ||
+    typeof password !== "string" ||
+    !name.trim() ||
+    !email.trim() ||
+    !password.trim()
+  ) {
+    res
+      .status(400)
+      .json({ message: "Name, email and password are required" });
     return;
   }
 
+  if (password.length < 6) {
+    res
+      .status(400)
+      .json({ message: "Password must be at least 6 characters" });
+    return;
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
   const existingUser = await prisma.user.findUnique({
-    where: { email: email.trim().toLowerCase() },
+    where: { email: normalizedEmail },
   });
 
   if (existingUser) {
@@ -62,26 +106,34 @@ export const register: RequestHandler = async (req, res) => {
   const hashed = await bcrypt.hash(password, 10);
 
   const user = await prisma.user.create({
-    data: { email: email.trim().toLowerCase(), password: hashed },
+    data: {
+      name: name.trim(),
+      email: normalizedEmail,
+      password: hashed,
+      role: sanitizeRole(role),
+    },
   });
 
-  res.status(201).json({
-    id: user.id,
-    email: user.email,
-    createdAt: user.createdAt,
-  });
+  res.status(201).json(publicUser(user));
 };
 
 export const login: RequestHandler = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password } = req.body ?? {};
 
-  if (typeof email !== "string" || typeof password !== "string" || !email.trim() || !password.trim()) {
+  if (
+    typeof email !== "string" ||
+    typeof password !== "string" ||
+    !email.trim() ||
+    !password.trim()
+  ) {
     res.status(400).json({ message: "Email and password are required" });
     return;
   }
 
   const normalizedEmail = email.trim().toLowerCase();
-  const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+  const user = await prisma.user.findUnique({
+    where: { email: normalizedEmail },
+  });
   if (!user) {
     res.status(401).json({ message: "Invalid credentials" });
     return;
@@ -96,7 +148,27 @@ export const login: RequestHandler = async (req, res) => {
   const accessToken = generateAccessToken(user.id);
   const refreshToken = await createRefreshTokenSession(user.id);
 
-  res.json({ accessToken, refreshToken });
+  res.json({ accessToken, refreshToken, user: publicUser(user) });
+};
+
+export const me: RequestHandler = async (req, res) => {
+  const user = await prisma.user.findUnique({
+    where: { id: req.userId },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      createdAt: true,
+    },
+  });
+
+  if (!user) {
+    res.status(404).json({ message: "User not found" });
+    return;
+  }
+
+  res.json(user);
 };
 
 export const refresh: RequestHandler = async (req, res) => {
@@ -144,6 +216,7 @@ export const refresh: RequestHandler = async (req, res) => {
     res.json({
       accessToken,
       refreshToken: nextRefreshToken,
+      user: publicUser(user),
     });
     return;
   } catch {

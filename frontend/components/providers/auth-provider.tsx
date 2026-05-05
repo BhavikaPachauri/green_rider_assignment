@@ -8,15 +8,26 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { apiRequest, postLogin, postLogout, postRefresh, postRegister } from "@/lib/api";
+import {
+  apiRequest,
+  getMe,
+  postLogin,
+  postLogout,
+  postRefresh,
+  postRegister,
+} from "@/lib/api";
 import { loadStoredSession, saveStoredSession } from "@/lib/storage";
-import type { AuthSession, RegisterPayload } from "@/types/api";
+import type {
+  AuthSession,
+  LoginPayload,
+  RegisterPayload,
+} from "@/types/api";
 
 type AuthContextValue = {
   session: AuthSession | null;
   hydrated: boolean;
   isAuthenticated: boolean;
-  login: (payload: RegisterPayload) => Promise<void>;
+  login: (payload: LoginPayload) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
   authorizedRequest: <T>(path: string, init?: RequestInit) => Promise<T>;
@@ -58,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ...currentSession,
       accessToken: refreshed.accessToken,
       refreshToken: refreshed.refreshToken,
+      user: refreshed.user ?? currentSession.user,
     };
 
     setPersistedSession(nextSession);
@@ -71,20 +83,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async login(payload) {
       const tokens = await postLogin(payload);
 
-      setPersistedSession({
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
-        email: payload.email.trim().toLowerCase(),
-      });
-    },
-    async register(payload) {
-      await postRegister(payload);
-      const tokens = await postLogin(payload);
+      const user =
+        tokens.user ??
+        (await getMe(tokens.accessToken));
 
       setPersistedSession({
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
-        email: payload.email.trim().toLowerCase(),
+        user,
+      });
+    },
+    async register(payload) {
+      await postRegister(payload);
+      const tokens = await postLogin({
+        email: payload.email,
+        password: payload.password,
+      });
+
+      const user =
+        tokens.user ??
+        (await getMe(tokens.accessToken));
+
+      setPersistedSession({
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        user,
       });
     },
     async logout() {

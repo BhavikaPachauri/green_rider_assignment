@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useToast } from "@/components/providers/toast-provider";
+import type { Role } from "@/types/api";
 
 type AuthScreenProps = {
   mode: "login" | "register";
@@ -14,8 +15,10 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
   const router = useRouter();
   const { login, register } = useAuth();
   const { showToast } = useToast();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState<Role>("MEMBER");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const content = useMemo(
@@ -23,8 +26,8 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
       mode === "login"
         ? {
             eyebrow: "Welcome Back",
-            title: "Log in and get your day back under control.",
-            body: "Your dashboard is ready with search, filters, task actions, and automatic token refresh already wired in.",
+            title: "Log in to your project workspace.",
+            body: "Track project progress, assign tasks, and stay on top of overdue work — all with role-based access for admins and members.",
             button: "Log In",
             switchText: "Need an account?",
             switchHref: "/register",
@@ -32,9 +35,9 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
             success: "You are logged in.",
           }
         : {
-            eyebrow: "Fresh Start",
-            title: "Create your workspace and start planning with clarity.",
-            body: "Registration connects directly to the backend, stores your session, and sends you straight into the task dashboard.",
+            eyebrow: "Get Started",
+            title: "Create your account and start managing projects.",
+            body: "Choose Admin to manage every project across the workspace, or Member to collaborate on the projects you're invited to.",
             button: "Create Account",
             switchText: "Already registered?",
             switchHref: "/login",
@@ -49,9 +52,20 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
 
     const normalizedEmail = email.trim().toLowerCase();
     const normalizedPassword = password.trim();
+    const normalizedName = name.trim();
 
     if (!normalizedEmail || !normalizedPassword) {
       showToast("Email and password are required.", "error");
+      return;
+    }
+
+    if (mode === "register" && !normalizedName) {
+      showToast("Name is required.", "error");
+      return;
+    }
+
+    if (normalizedPassword.length < 6) {
+      showToast("Password must be at least 6 characters.", "error");
       return;
     }
 
@@ -65,8 +79,10 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
         });
       } else {
         await register({
+          name: normalizedName,
           email: normalizedEmail,
           password: normalizedPassword,
+          role,
         });
       }
 
@@ -96,12 +112,12 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
               href="/"
               className="display-font text-sm uppercase tracking-[0.35em] text-accent-secondary"
             >
-              Earnest Tasks
+              Earnest Projects
             </Link>
             <p className="mt-10 text-sm font-semibold uppercase tracking-[0.3em] text-accent">
               {content.eyebrow}
             </p>
-            <h1 className="display-font mt-4 text-balance text-4xl leading-none font-semibold sm:text-3xl">
+            <h1 className="display-font mt-4 text-balance text-4xl leading-tight font-semibold sm:text-3xl">
               {content.title}
             </h1>
             <p className="mt-6 max-w-xl text-base leading-8 text-muted sm:text-base">
@@ -110,9 +126,9 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
 
             <div className="mt-10 grid gap-4 sm:grid-cols-3">
               {[
-                ["Session", "Access token storage with refresh support"],
-                ["Actions", "Create, edit, toggle, and delete tasks fast"],
-                ["Flow", "Built for phone screens and roomy desktops"],
+                ["Projects", "Group tasks under projects with team members"],
+                ["Roles", "Admins manage everything; members collaborate"],
+                ["Overdue", "Spot late tasks and rebalance workloads"],
               ].map(([title, body]) => (
                 <div
                   key={title}
@@ -140,6 +156,22 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
             </div>
 
             <form className="space-y-5" onSubmit={handleSubmit}>
+              {mode === "register" ? (
+                <label className="block">
+                  <span className="mb-2 block text-sm font-semibold text-foreground">
+                    Full name
+                  </span>
+                  <input
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    type="text"
+                    placeholder="Your name"
+                    className="w-full rounded-2xl border border-line bg-background-soft px-4 py-3 text-base outline-none focus:border-accent focus:bg-white"
+                    autoComplete="name"
+                  />
+                </label>
+              ) : null}
+
               <label className="block">
                 <span className="mb-2 block text-sm font-semibold text-foreground">
                   Email address
@@ -150,6 +182,7 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
                   type="email"
                   placeholder="you@example.com"
                   className="w-full rounded-2xl border border-line bg-background-soft px-4 py-3 text-base outline-none focus:border-accent focus:bg-white"
+                  autoComplete="email"
                 />
               </label>
 
@@ -161,10 +194,46 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   type="password"
-                  placeholder="At least 8 characters"
+                  placeholder="At least 6 characters"
                   className="w-full rounded-2xl border border-line bg-background-soft px-4 py-3 text-base outline-none focus:border-accent focus:bg-white"
+                  autoComplete={
+                    mode === "login" ? "current-password" : "new-password"
+                  }
                 />
               </label>
+
+              {mode === "register" ? (
+                <div>
+                  <span className="mb-2 block text-sm font-semibold text-foreground">
+                    Account role
+                  </span>
+                  <div className="flex gap-2 rounded-2xl border border-line bg-background-soft p-1">
+                    {(
+                      [
+                        ["MEMBER", "Member"],
+                        ["ADMIN", "Admin"],
+                      ] as const
+                    ).map(([value, label]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setRole(value)}
+                        className={`flex-1 rounded-xl px-4 py-2 text-sm font-semibold ${
+                          role === value
+                            ? "bg-foreground text-white"
+                            : "text-muted hover:text-accent"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="mt-2 text-xs text-muted">
+                    Admins can manage all projects and members. Members can be
+                    invited to projects.
+                  </p>
+                </div>
+              ) : null}
 
               <button
                 type="submit"

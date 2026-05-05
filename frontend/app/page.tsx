@@ -7,10 +7,10 @@ export default function Home() {
         <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="display-font text-sm uppercase tracking-[0.35em] text-accent-secondary">
-              Earnest Tasks
+              Earnest Projects
             </p>
-            <h1 className="display-font mt-3 max-w-2xl text-balance text-4xl leading-none font-semibold sm:text-5xl lg:text-6xl">
-              Calm planning for days that refuse to stay simple.
+            <h1 className="display-font mt-3 max-w-2xl text-balance text-4xl leading-tight font-semibold sm:text-5xl lg:text-6xl">
+              Run projects, assign work, and track every deadline.
             </h1>
           </div>
 
@@ -34,20 +34,20 @@ export default function Home() {
           <div className="glass-panel overflow-hidden rounded-[2rem] p-6 sm:p-8">
             <div className="max-w-2xl">
               <p className="mb-4 inline-flex rounded-full border border-accent/20 bg-accent/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-accent">
-                Next.js + TypeScript + Tailwind
+                Next.js · Express · Prisma · MySQL
               </p>
               <p className="text-balance text-lg leading-8 text-muted sm:text-xl">
-                Sign in, manage tasks, search fast, filter clearly, and stay
-                logged in with refresh-token support already connected to your
-                backend API.
+                A full-stack project tracker with role-based access, project
+                workspaces, task assignment, status tracking, and an at-a-glance
+                dashboard for overdue work.
               </p>
             </div>
 
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
               {[
-                ["Secure", "JWT access and refresh token flow"],
-                ["Responsive", "Comfortable layout on mobile and desktop"],
-                ["Focused", "Search, filters, CRUD, and clean toasts"],
+                ["Projects", "Group tasks, invite teammates, track progress"],
+                ["Roles", "Admin and Member access with route-level guards"],
+                ["Dashboard", "Status totals, overdue alerts, upcoming work"],
               ].map(([title, body]) => (
                 <div
                   key={title}
@@ -63,14 +63,14 @@ export default function Home() {
           <div className="soft-panel rounded-[2rem] p-6 sm:p-8">
             <div className="rounded-[1.75rem] bg-foreground px-5 py-6 text-white">
               <p className="text-sm uppercase tracking-[0.25em] text-white/70">
-                Live Workflow
+                Built-in Workflow
               </p>
               <div className="mt-5 space-y-4">
                 {[
-                  "Register and log in from dedicated auth screens",
-                  "Create tasks, edit details, delete, and toggle completion",
-                  "Search by title and filter by task status",
-                  "Refresh tokens automatically when access expires",
+                  "Sign up with Admin or Member role",
+                  "Create projects and invite teammates by email",
+                  "Add tasks with status, due date, and assignee",
+                  "Watch overdue and in-progress counts on the dashboard",
                 ].map((item, index) => (
                   <div key={item} className="flex gap-3">
                     <div className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/12 text-xs font-semibold">

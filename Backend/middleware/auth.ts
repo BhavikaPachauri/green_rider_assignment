@@ -1,7 +1,9 @@
 import type { RequestHandler } from "express";
 import jwt from "jsonwebtoken";
+import { prisma } from "../lib/prisma.js";
+import type { Role } from "../generated/prisma/client.js";
 
-export const authMiddleware: RequestHandler = (req, res, next) => {
+export const authMiddleware: RequestHandler = async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
@@ -13,11 +15,33 @@ export const authMiddleware: RequestHandler = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as {
       userId: number;
     };
-    req.userId = decoded.userId;
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { id: true, role: true },
+    });
+
+    if (!user) {
+      res.status(401).json({ message: "Invalid token" });
+      return;
+    }
+
+    req.userId = user.id;
+    req.userRole = user.role;
     next();
     return;
   } catch {
     res.status(401).json({ message: "Invalid token" });
     return;
   }
+};
+
+export const requireRole = (...roles: Role[]): RequestHandler => {
+  return (req, res, next) => {
+    if (!roles.includes(req.userRole)) {
+      res.status(403).json({ message: "Forbidden: insufficient role" });
+      return;
+    }
+    next();
+  };
 };

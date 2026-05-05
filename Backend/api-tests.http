@@ -1,17 +1,23 @@
 @baseUrl = http://localhost:5000
-@email = test@example.com
-@password = 12345678
-@accessToken = 
-@refreshToken = 
+@name = Demo User
+@email = demo@example.com
+@password = secret123
+@role = ADMIN
+@accessToken =
+@refreshToken =
+@projectId = 1
 @taskId = 1
+@memberEmail = teammate@example.com
 
 ### Register
 POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
+  "name": "{{name}}",
   "email": "{{email}}",
-  "password": "{{password}}"
+  "password": "{{password}}",
+  "role": "{{role}}"
 }
 
 ### Login
@@ -29,8 +35,11 @@ Content-Type: application/json
   client.global.set("refreshToken", response.body.refreshToken);
 %}
 
-### Refresh Token
-# @name refresh
+### Current user
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{accessToken}}
+
+### Refresh token
 POST {{baseUrl}}/auth/refresh
 Content-Type: application/json
 
@@ -51,65 +60,94 @@ Content-Type: application/json
   "refreshToken": "{{refreshToken}}"
 }
 
-### Create Task
+### Create project
+# @name createProject
+POST {{baseUrl}}/projects
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Marketing Site",
+  "description": "Q2 launch project"
+}
+
+> {%
+  client.global.set("projectId", response.body.id);
+%}
+
+### List projects
+GET {{baseUrl}}/projects
+Authorization: Bearer {{accessToken}}
+
+### Project detail
+GET {{baseUrl}}/projects/{{projectId}}
+Authorization: Bearer {{accessToken}}
+
+### Update project
+PATCH {{baseUrl}}/projects/{{projectId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Marketing Site (renamed)"
+}
+
+### Add member
+POST {{baseUrl}}/projects/{{projectId}}/members
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "email": "{{memberEmail}}"
+}
+
+### Create task
 # @name createTask
 POST {{baseUrl}}/tasks
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
-  "title": "My first task"
+  "title": "Outline landing page",
+  "description": "Hero copy + CTA",
+  "projectId": {{projectId}},
+  "status": "TODO",
+  "dueDate": "2026-06-01"
 }
 
 > {%
   client.global.set("taskId", response.body.id);
 %}
 
-### Get All Tasks
-GET {{baseUrl}}/tasks
+### List tasks
+GET {{baseUrl}}/tasks?page=1&limit=10
 Authorization: Bearer {{accessToken}}
 
-### Get Tasks With Pagination
-GET {{baseUrl}}/tasks?page=1&limit=5
+### List overdue tasks
+GET {{baseUrl}}/tasks?overdue=true
 Authorization: Bearer {{accessToken}}
 
-### Get Tasks Filtered By Status
-GET {{baseUrl}}/tasks?status=false
+### Tasks assigned to me
+GET {{baseUrl}}/tasks?mine=true
 Authorization: Bearer {{accessToken}}
 
-### Search Tasks By Title
-GET {{baseUrl}}/tasks?search=first
-Authorization: Bearer {{accessToken}}
-
-### Get One Task
-GET {{baseUrl}}/tasks/{{taskId}}
-Authorization: Bearer {{accessToken}}
-
-### Update Task
+### Update task status
 PATCH {{baseUrl}}/tasks/{{taskId}}
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
-  "title": "Updated task title",
-  "completed": false
+  "status": "IN_PROGRESS"
 }
 
-### Toggle Task
-PATCH {{baseUrl}}/tasks/{{taskId}}/toggle
-Authorization: Bearer {{accessToken}}
-
-### Delete Task
+### Delete task
 DELETE {{baseUrl}}/tasks/{{taskId}}
 Authorization: Bearer {{accessToken}}
 
-### Unauthorized Check
-GET {{baseUrl}}/tasks
-
-### Validation Check: Empty Task Title
-POST {{baseUrl}}/tasks
+### Dashboard summary
+GET {{baseUrl}}/dashboard/summary
 Authorization: Bearer {{accessToken}}
-Content-Type: application/json
 
-{}
-
+### Search users
+GET {{baseUrl}}/users?search=demo
+Authorization: Bearer {{accessToken}}
