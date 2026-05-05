@@ -7,4 +7,12 @@
 *
 * 🟢 You can import this file directly.
 */
-export {};
+export const Role = {
+    ADMIN: 'ADMIN',
+    MEMBER: 'MEMBER'
+};
+export const TaskStatus = {
+    TODO: 'TODO',
+    IN_PROGRESS: 'IN_PROGRESS',
+    DONE: 'DONE'
+};

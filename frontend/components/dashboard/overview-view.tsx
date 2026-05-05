@@ -40,7 +40,6 @@ export default function OverviewView({
 
   useEffect(() => {
     let cancelled = false;
-    setIsLoading(true);
     authorizedRequest<DashboardSummary>("/dashboard/summary")
       .then((data) => {
         if (!cancelled) setSummary(data);

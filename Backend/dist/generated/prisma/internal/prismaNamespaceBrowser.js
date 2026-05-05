@@ -40,6 +40,8 @@ export const JsonNull = runtime.JsonNull;
 export const AnyNull = runtime.AnyNull;
 export const ModelName = {
     User: 'User',
+    Project: 'Project',
+    ProjectMember: 'ProjectMember',
     Task: 'Task'
 };
 /*
@@ -53,18 +55,39 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 });
 export const UserScalarFieldEnum = {
     id: 'id',
+    name: 'name',
     email: 'email',
     password: 'password',
+    role: 'role',
     refreshTokenHash: 'refreshTokenHash',
     refreshTokenExpiry: 'refreshTokenExpiry',
     createdAt: 'createdAt'
 };
+export const ProjectScalarFieldEnum = {
+    id: 'id',
+    name: 'name',
+    description: 'description',
+    ownerId: 'ownerId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+export const ProjectMemberScalarFieldEnum = {
+    id: 'id',
+    projectId: 'projectId',
+    userId: 'userId',
+    joinedAt: 'joinedAt'
+};
 export const TaskScalarFieldEnum = {
     id: 'id',
     title: 'title',
-    completed: 'completed',
-    userId: 'userId',
-    createdAt: 'createdAt'
+    description: 'description',
+    status: 'status',
+    dueDate: 'dueDate',
+    projectId: 'projectId',
+    assigneeId: 'assigneeId',
+    creatorId: 'creatorId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
 };
 export const SortOrder = {
     asc: 'asc',
@@ -75,10 +98,16 @@ export const NullsOrder = {
     last: 'last'
 };
 export const UserOrderByRelevanceFieldEnum = {
+    name: 'name',
     email: 'email',
     password: 'password',
     refreshTokenHash: 'refreshTokenHash'
 };
+export const ProjectOrderByRelevanceFieldEnum = {
+    name: 'name',
+    description: 'description'
+};
 export const TaskOrderByRelevanceFieldEnum = {
-    title: 'title'
+    title: 'title',
+    description: 'description'
 };

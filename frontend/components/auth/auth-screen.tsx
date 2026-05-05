@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useToast } from "@/components/providers/toast-provider";
 import type { Role } from "@/types/api";
@@ -13,7 +13,7 @@ type AuthScreenProps = {
 
 export default function AuthScreen({ mode }: AuthScreenProps) {
   const router = useRouter();
-  const { login, register } = useAuth();
+  const { hydrated, isAuthenticated, login, register } = useAuth();
   const { showToast } = useToast();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -33,19 +33,27 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
             switchHref: "/register",
             switchLabel: "Create one",
             success: "You are logged in.",
+            loading: "Signing you in...",
           }
         : {
             eyebrow: "Get Started",
             title: "Create your account and start managing projects.",
-            body: "Choose Admin to manage every project across the workspace, or Member to collaborate on the projects you're invited to.",
+            body: "Create your account first. For safety, you will sign in separately before entering the workspace.",
             button: "Create Account",
             switchText: "Already registered?",
             switchHref: "/login",
             switchLabel: "Log in",
-            success: "Account created and signed in.",
+            success: "Account created. Please log in to continue.",
+            loading: "Creating account...",
           },
     [mode],
   );
+
+  useEffect(() => {
+    if (hydrated && isAuthenticated) {
+      router.replace("/dashboard");
+    }
+  }, [hydrated, isAuthenticated, router]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -77,6 +85,9 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
           email: normalizedEmail,
           password: normalizedPassword,
         });
+
+        showToast(content.success, "success");
+        router.push("/dashboard");
       } else {
         await register({
           name: normalizedName,
@@ -84,10 +95,10 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
           password: normalizedPassword,
           role,
         });
-      }
 
-      showToast(content.success, "success");
-      router.push("/dashboard");
+        showToast(content.success, "success");
+        router.push("/login");
+      }
     } catch (error) {
       showToast(
         error instanceof Error
@@ -237,10 +248,10 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
 
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !hydrated}
                 className="w-full rounded-2xl bg-foreground px-5 py-3 text-sm font-semibold text-white hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSubmitting ? "Working..." : content.button}
+                {isSubmitting ? content.loading : content.button}
               </button>
             </form>
 

@@ -9,6 +9,32 @@ type AdapterConfig = {
   password: string;
   database: string;
   connectionLimit: number;
+  ssl?: boolean | {
+    ca?: string;
+    rejectUnauthorized?: boolean;
+  };
+};
+
+const parseBoolean = (value: string | undefined) => {
+  if (!value) return false;
+  return ["1", "true", "yes", "require", "required"].includes(
+    value.trim().toLowerCase(),
+  );
+};
+
+const sslConfig = () => {
+  if (!parseBoolean(process.env.DATABASE_SSL)) {
+    return undefined;
+  }
+
+  const ca = process.env.DATABASE_SSL_CA?.replace(/\\n/g, "\n");
+
+  return {
+    ...(ca ? { ca } : {}),
+    rejectUnauthorized: !parseBoolean(
+      process.env.DATABASE_SSL_ALLOW_UNAUTHORIZED,
+    ),
+  };
 };
 
 const parseDatabaseUrl = (raw: string | undefined): AdapterConfig | null => {
@@ -22,6 +48,7 @@ const parseDatabaseUrl = (raw: string | undefined): AdapterConfig | null => {
       password: decodeURIComponent(url.password),
       database: url.pathname.replace(/^\//, ""),
       connectionLimit: 5,
+      ssl: sslConfig(),
     };
   } catch {
     return null;
@@ -37,6 +64,7 @@ const fromEnv = (): AdapterConfig => {
     password: process.env.DATABASE_PASSWORD ?? "",
     database: process.env.DATABASE_NAME ?? "earnest",
     connectionLimit: 5,
+    ssl: sslConfig(),
   };
 };
 

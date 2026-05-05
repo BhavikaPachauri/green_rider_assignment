@@ -95,20 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     async register(payload) {
       await postRegister(payload);
-      const tokens = await postLogin({
-        email: payload.email,
-        password: payload.password,
-      });
-
-      const user =
-        tokens.user ??
-        (await getMe(tokens.accessToken));
-
-      setPersistedSession({
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
-        user,
-      });
+      setPersistedSession(null);
     },
     async logout() {
       const currentSession = sessionRef.current;

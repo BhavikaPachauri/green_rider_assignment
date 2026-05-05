@@ -10,8 +10,23 @@ import type {
 } from "@/types/api";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ??
+  normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_BASE_URL) ??
   "http://localhost:5000";
+
+function normalizeApiBaseUrl(value?: string) {
+  const trimmed = value?.trim();
+
+  if (!trimmed) {
+    return undefined;
+  }
+
+  const withoutTrailingSlash = trimmed.replace(/\/+$/, "");
+
+  return withoutTrailingSlash.replace(
+    /\/(?:auth|projects|tasks|users|dashboard)$/,
+    "",
+  );
+}
 
 function buildUrl(path: string) {
   return `${API_BASE_URL}${path}`;

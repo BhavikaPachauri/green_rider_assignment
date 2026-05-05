@@ -2,14 +2,42 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.routes.js";
+import projectRoutes from "./routes/project.routes.js";
 import taskRoutes from "./routes/task.routes.js";
+import dashboardRoutes from "./routes/dashboard.routes.js";
+import userRoutes from "./routes/user.routes.js";
 dotenv.config();
 const app = express();
 const port = Number(process.env.PORT) || 5000;
-app.use(cors());
+const allowedOrigins = (process.env.CORS_ORIGINS ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+app.use(cors({
+    origin: allowedOrigins.length === 0 ? true : allowedOrigins,
+    credentials: true,
+}));
 app.use(express.json());
+app.get("/", (_req, res) => {
+    res.json({
+        name: "Earnest Project Tracker API",
+        status: "ok",
+        endpoints: ["/auth", "/projects", "/tasks", "/users", "/dashboard"],
+    });
+});
+app.get("/health", (_req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
 app.use("/auth", authRoutes);
+app.use("/projects", projectRoutes);
 app.use("/tasks", taskRoutes);
+app.use("/users", userRoutes);
+app.use("/dashboard", dashboardRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/projects", projectRoutes);
+app.use("/api/tasks", taskRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 app.use((_req, res) => {
     res.status(404).json({ message: "Route not found" });
 });
