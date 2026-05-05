@@ -56,6 +56,18 @@ Root Directory: frontend
 Build Command: npm run build
 ```
 
+> [!IMPORTANT]
+> This is a monorepo (`Backend/` and `frontend/`). There is no `package.json`
+> at the repo root, so Vercel **must** be pointed at `frontend/`.
+>
+> In the Vercel dashboard, open **Settings → General → Root Directory**, set
+> it to `frontend`, and save. Without this, the deploy succeeds but the site
+> shows a blank page or a 404.
+>
+> `frontend/vercel.json` pins `framework: "nextjs"` and the build/install
+> commands, but it cannot set Root Directory — that is a project-level
+> setting only available in the Vercel UI.
+
 Add this environment variable in Vercel:
 
 ```env
