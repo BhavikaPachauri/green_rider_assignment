@@ -123,7 +123,7 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
               href="/"
               className="display-font text-sm uppercase tracking-[0.35em] text-accent-secondary"
             >
-              Earnest Projects
+              Green Rider Projects
             </Link>
             <p className="mt-10 text-sm font-semibold uppercase tracking-[0.3em] text-accent">
               {content.eyebrow}

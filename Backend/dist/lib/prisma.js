@@ -42,7 +42,7 @@ const fromEnv = () => {
         port: Number.isNaN(port) ? 3306 : port,
         user: process.env.DATABASE_USER ?? "root",
         password: process.env.DATABASE_PASSWORD ?? "",
-        database: process.env.DATABASE_NAME ?? "earnest",
+        database: process.env.DATABASE_NAME ?? "Green Rider",
         connectionLimit: 5,
         ssl: sslConfig(),
     };

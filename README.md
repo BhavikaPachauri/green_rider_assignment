@@ -1,4 +1,4 @@
-# Earnest Projects — Project & Task Tracker
+# Green Rider Projects — Project & Task Tracker
 
 A full-stack web app for **project and team management** with role-based access
 (Admin / Member), task assignment, status tracking, due dates, and overdue
@@ -163,7 +163,7 @@ Set the following variables on the backend service:
 - `DATABASE_URL` — paste the MySQL connection URL from Railway.
 - `JWT_ACCESS_SECRET` — long random string.
 - `JWT_REFRESH_SECRET` — long random string.
-- `CORS_ORIGINS` — your deployed frontend origin (e.g. `https://earnest-projects.up.railway.app`).
+- `CORS_ORIGINS` — your deployed frontend origin (e.g. `https://Green Rider-projects.up.railway.app`).
 - `PORT` — Railway sets this automatically; the app respects it.
 
 `Backend/railway.json` runs:

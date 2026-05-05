@@ -3,7 +3,7 @@ import AppProviders from "@/components/providers/app-providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Earnest Projects",
+  title: "Green Rider Projects",
   description:
     "Project and task tracker with role-based access, assignment, status, and overdue alerts.",
 };

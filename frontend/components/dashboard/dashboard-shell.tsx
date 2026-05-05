@@ -73,7 +73,7 @@ export default function DashboardShell() {
               </div>
               <div>
                 <p className="display-font text-sm uppercase tracking-[0.32em] text-accent-secondary">
-                  Earnest Projects
+                  Green Rider Projects
                 </p>
                 <h1 className="display-font mt-1 text-balance text-3xl leading-tight font-semibold">
                   Welcome back, {session.user.name}.

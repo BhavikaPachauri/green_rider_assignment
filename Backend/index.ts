@@ -29,7 +29,7 @@ app.use(express.json());
 
 app.get("/", (_req, res) => {
   res.json({
-    name: "Earnest Project Tracker API",
+    name: "Green Rider Project Tracker API",
     status: "ok",
     endpoints: ["/auth", "/projects", "/tasks", "/users", "/dashboard"],
   });

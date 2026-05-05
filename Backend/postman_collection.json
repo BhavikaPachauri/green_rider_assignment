@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Earnest Task Management API",
-    "_postman_id": "0f8f6c2a-b318-4f73-a9fa-earnest-backend",
+    "name": "Green Rider Task Management API",
+    "_postman_id": "0f8f6c2a-b318-4f73-a9fa-Green Rider-backend",
     "description": "Postman collection for testing the backend auth and task APIs.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },

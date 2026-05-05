@@ -7,7 +7,7 @@ export default function Home() {
         <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="display-font text-sm uppercase tracking-[0.35em] text-accent-secondary">
-              Earnest Projects
+              Green Rider Projects
             </p>
             <h1 className="display-font mt-3 max-w-2xl text-balance text-4xl leading-tight font-semibold sm:text-5xl lg:text-6xl">
               Run projects, assign work, and track every deadline.
